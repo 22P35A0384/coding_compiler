@@ -22,7 +22,7 @@ const compilePython = async (req, res) => {
         // Function to execute Python code for each test case
         const executeTestCase = (input, expectedOutput, isHidden = false) => {
             return new Promise((resolve) => {
-                const pythonProcess = spawn('sh', ['-c', `echo "${input}" | /usr/bin/time -v python3 -c "${code.replace(/"/g, '\\"')}"`]);
+                const pythonProcess = spawn('sh', ['-c', `echo "${input}" | /usr/bin/time -v python3 -c "${code.replace(/"/g, '\\"')}" 2>&1`]);
 
                 let output = '';
                 let error = '';
@@ -59,20 +59,23 @@ const compilePython = async (req, res) => {
                         const memoryUsage = memoryUsageMatch ? parseInt(memoryUsageMatch[1], 10) : null;
                         const timeTaken = timeTakenMatch ? parseFloat(timeTakenMatch[1]) : null;
 
+                        // Extract the actual output of the Python code
+                        const actualOutput = output.split('\n')[0].trim();
+
                         if (code !== 0 || error) {
                             resolve({
                                 result: 'failed',
-                                output: output.trim(),
+                                output: actualOutput,
                                 error: error.trim(),
                                 memoryUsage,
                                 timeTaken,
                                 isHidden,
                             });
                         } else {
-                            const passed = output.trim() === expectedOutput;
+                            const passed = actualOutput === expectedOutput;
                             resolve({
                                 result: passed ? 'passed' : 'failed',
-                                output: output.trim(),
+                                output: actualOutput,
                                 memoryUsage,
                                 timeTaken,
                                 isHidden,
