@@ -22,12 +22,16 @@ const compilePython = async (req, res) => {
         // Function to execute Python code for each test case
         const executeTestCase = (input, expectedOutput, isHidden = false) => {
             return new Promise((resolve) => {
-                const pythonProcess = spawn('sh', ['-c', `echo "${input}" | /usr/bin/time -v python3 -c "${code.replace(/"/g, '\\"')}" 2>&1`]);
+                const pythonProcess = spawn('python3', ['-c', code]);
 
                 let output = '';
                 let error = '';
                 let responded = false;
                 const timeout = 20000; // 20-second timeout for each test case
+
+                // Send input to the Python process
+                pythonProcess.stdin.write(input);
+                pythonProcess.stdin.end();
 
                 // Set a timeout to kill the process if it runs too long
                 const timer = setTimeout(() => {
@@ -52,37 +56,19 @@ const compilePython = async (req, res) => {
 
                 pythonProcess.on('close', (code) => {
                     clearTimeout(timer); // Clear timeout if process completes
-
-                    // Print the error output for debugging (to see if memory and time details are included)
-                    console.log('Error output:', error);
-
                     if (!responded) {
-                        // Use regular expressions to capture memory and time information
-                        const memoryUsageMatch = error.match(/Maximum resident set size \(kbytes\): (\d+)/);
-                        const timeTakenMatch = error.match(/User time \(seconds\): ([\d.]+)/);
-
-                        const memoryUsage = memoryUsageMatch ? parseInt(memoryUsageMatch[1], 10) : null;
-                        const timeTaken = timeTakenMatch ? parseFloat(timeTakenMatch[1]) : null;
-
-                        // Extract the actual output of the Python code
-                        const actualOutput = output.split('\n')[0].trim();
-
                         if (code !== 0 || error) {
                             resolve({
                                 result: 'failed',
-                                output: actualOutput,
+                                output: output.trim(),
                                 error: error.trim(),
-                                memoryUsage,
-                                timeTaken,
                                 isHidden,
                             });
                         } else {
-                            const passed = actualOutput === expectedOutput;
+                            const passed = output.trim() === expectedOutput;
                             resolve({
                                 result: passed ? 'passed' : 'failed',
-                                output: actualOutput,
-                                memoryUsage,
-                                timeTaken,
+                                output: output.trim(),
                                 isHidden,
                             });
                         }
@@ -114,8 +100,6 @@ const compilePython = async (req, res) => {
                 output: result.output,
                 result: result.result,
                 error: result.error || null,
-                memoryUsage: result.memoryUsage,
-                timeTaken: result.timeTaken,
             });
         }
 
@@ -126,8 +110,6 @@ const compilePython = async (req, res) => {
             results.push({
                 result: result.result,
                 error: result.error || null,
-                memoryUsage: result.memoryUsage,
-                timeTaken: result.timeTaken,
                 isHidden: true, // Mark as hidden test case
             });
         }
@@ -138,8 +120,6 @@ const compilePython = async (req, res) => {
                 return {
                     result: testCase.result,
                     error: testCase.error,
-                    memoryUsage: testCase.memoryUsage,
-                    timeTaken: testCase.timeTaken,
                     isHidden: testCase.isHidden,
                 };
             }
@@ -166,7 +146,7 @@ const compilePython = async (req, res) => {
 
             // Update the problem's solved_users array
             await Problem.findByIdAndUpdate(id, {
-                $addToSet: { solved_users: { user_id: userId, code, language: "Python" } }, // Ensure no duplicate user entries
+                $addToSet: { solved_users: { user_id: userId, code,language:"Python" } }, // Ensure no duplicate user entries
             });
         }
 
