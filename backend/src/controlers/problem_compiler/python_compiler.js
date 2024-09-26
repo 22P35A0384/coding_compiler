@@ -22,7 +22,7 @@ const compilePython = async (req, res) => {
         // Function to execute Python code for each test case
         const executeTestCase = (input, expectedOutput, isHidden = false) => {
             return new Promise((resolve) => {
-                const pythonProcess = spawn('python', ['-c', code]);
+                const pythonProcess = spawn('python3', ['-c', code]);
 
                 let output = '';
                 let error = '';
