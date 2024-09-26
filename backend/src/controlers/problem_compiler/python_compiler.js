@@ -52,7 +52,12 @@ const compilePython = async (req, res) => {
 
                 pythonProcess.on('close', (code) => {
                     clearTimeout(timer); // Clear timeout if process completes
+
+                    // Print the error output for debugging (to see if memory and time details are included)
+                    console.log('Error output:', error);
+
                     if (!responded) {
+                        // Use regular expressions to capture memory and time information
                         const memoryUsageMatch = error.match(/Maximum resident set size \(kbytes\): (\d+)/);
                         const timeTakenMatch = error.match(/User time \(seconds\): ([\d.]+)/);
 
