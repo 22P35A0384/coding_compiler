@@ -1,5 +1,5 @@
 import express from "express";
-import compileVerilog from "../../controlers/problem_compiler/verilog_compiler.js";
+import compileVerilog from "../../controlers/problem_compiler/varilog_compiler.js";
 
 const Router = express.Router();
 
