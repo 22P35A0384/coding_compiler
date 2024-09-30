@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 // Function to execute Verilog code for each test case
 const executeVerilogTestCase = (input, expectedOutput, isHidden = false) => {
     return new Promise((resolve) => {
-        const verilogProcess = spawn('vvp', ['temp_out.vvp'], { cwd: __dirname }); // Use vvp to run compiled Verilog
+        const verilogProcess = spawn('vvp', ['temp_out.vvp'], { cwd: __dirname });
 
         let output = '';
         let error = '';
@@ -19,7 +19,7 @@ const executeVerilogTestCase = (input, expectedOutput, isHidden = false) => {
         const timeout = 20000; // 20-second timeout for each test case
 
         // Send input to the Verilog process
-        verilogProcess.stdin.write(input);
+        verilogProcess.stdin.write(`${input}\n`); // Ensure input format matches expected format in Verilog
         verilogProcess.stdin.end();
 
         // Set a timeout to kill the process if it runs too long
@@ -78,13 +78,12 @@ const compileVerilog = async (req, res) => {
         // Fetch problem data by ID
         const ProblemData = await Problem.findById(id);
 
-        // // Combine sampleInputs and hiddenTestCases into one array
-        // const sampleTestCases = ProblemData ? ProblemData.sampleInputs : ""; // Sample test cases
-        // const hiddenTestCases = ProblemData ? ProblemData.hiddenTestCases : ""; // Hidden test cases
+        const sampleTestCases = ProblemData.sampleInputs || [];
+        const hiddenTestCases = ProblemData.hiddenTestCases || [];
 
-        // // Extract input/output for both sample and hidden test cases
-        // const sampleInputOutputList = sampleTestCases.map(({ input, output }) => ({ input, output }));
-        // const hiddenInputOutputList = hiddenTestCases.map(({ input, output }) => ({ input, output }));
+        // Extract input/output for both sample and hidden test cases
+        const sampleInputOutputList = sampleTestCases.map(({ input, output }) => ({ input, output }));
+        const hiddenInputOutputList = hiddenTestCases.map(({ input, output }) => ({ input, output }));
 
         const filePath = path.join(__dirname, `temp_code.v`); // Save Verilog code as temp_code.v
         const compiledFilePath = path.join(__dirname, 'temp_out.vvp');
