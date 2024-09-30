@@ -3,10 +3,10 @@ import mysql from 'mysql2/promise'; // Use mysql2 for promise support
 // Create a MySQL connection pool for the main database
 const pool = mysql.createPool({
     host: 'localhost',
-    user: 'root',
-    password: 'Thub@1234', // Replace with your actual password
+    user: 'admin',
+    password: '#Thub(1234)', // Replace with your actual password
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 1000,
     queueLimit: 0,
 });
 
@@ -60,8 +60,8 @@ const executeSQLQuery = async (req, res) => {
         // Create a new connection to the user's specific database
         const userPool = mysql.createPool({
             host: 'localhost',
-            user: 'root',
-            password: 'Thub@1234', // Replace with your actual password
+            user: 'admin',
+            password: '#Thub(1234)', // Replace with your actual password
             database: userDatabase, // Use the user's database
             waitForConnections: true,
             connectionLimit: 10,
