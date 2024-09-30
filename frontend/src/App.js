@@ -11,6 +11,8 @@ import CreateContestPage from './pages/createcontest';
 import SingleContestPage from './pages/singlecontest';
 import Piston from './pages/testcompiler';
 import Signup from './pages/signup';
+import SqlandVarilog from './pages/sql&varilog';
+import Varilog from './pages/varilog';
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
           <Route path='/createcontest' element={<CreateContestPage/>}/>
           <Route path='/contest/:id' element={<SingleContestPage/>}/>
           <Route path='/piston' element={<Piston/>}/>
+          <Route path='/sql' element={<SqlandVarilog/>}/>
+          <Route path='/verilog' element={<Varilog/>}/>
         </Routes>
       </BrowserRouter>
     </div>

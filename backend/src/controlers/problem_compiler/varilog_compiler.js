@@ -78,13 +78,13 @@ const compileVerilog = async (req, res) => {
         // Fetch problem data by ID
         const ProblemData = await Problem.findById(id);
 
-        // Combine sampleInputs and hiddenTestCases into one array
-        const sampleTestCases = ProblemData.sampleInputs; // Sample test cases
-        const hiddenTestCases = ProblemData.hiddenTestCases; // Hidden test cases
+        // // Combine sampleInputs and hiddenTestCases into one array
+        // const sampleTestCases = ProblemData ? ProblemData.sampleInputs : ""; // Sample test cases
+        // const hiddenTestCases = ProblemData ? ProblemData.hiddenTestCases : ""; // Hidden test cases
 
-        // Extract input/output for both sample and hidden test cases
-        const sampleInputOutputList = sampleTestCases.map(({ input, output }) => ({ input, output }));
-        const hiddenInputOutputList = hiddenTestCases.map(({ input, output }) => ({ input, output }));
+        // // Extract input/output for both sample and hidden test cases
+        // const sampleInputOutputList = sampleTestCases.map(({ input, output }) => ({ input, output }));
+        // const hiddenInputOutputList = hiddenTestCases.map(({ input, output }) => ({ input, output }));
 
         const filePath = path.join(__dirname, `temp_code.v`); // Save Verilog code as temp_code.v
         const compiledFilePath = path.join(__dirname, 'temp_out.vvp');

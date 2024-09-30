@@ -33,7 +33,7 @@ import DartProblemCompiler from "./src/routers/problem_compiler/dart_router.js";
 import JsProblemCompiler from "./src/routers/problem_compiler/js_router.js";
 import CppProblemCompiler from "./src/routers/problem_compiler/cpp_router.js";
 import VerilogProblemCompiler from "./src/routers/problem_compiler/varilog_router.js";
-
+import SqlProblemCompiler from "./src/routers/problem_compiler/sql_router.js";
 
 const app = express();
 
@@ -77,6 +77,7 @@ app.use('/',Otpverificationapi);
 app.use('/',Newuserapi);
 app.use('/',Loginapi);
 app.use('/',VerilogProblemCompiler);
+app.use('/',SqlProblemCompiler);
 
 
 // Testing Space

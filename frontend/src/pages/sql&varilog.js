@@ -13,7 +13,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useNavigate } from 'react-router-dom';
 import api from '../backendapi';
 
-const CodeExecution = () => {
+const SqlandVarilog = () => {
     const navigate = useNavigate()
     const [userName, setUsername] = useState('')
     useEffect(()=>{
@@ -25,7 +25,7 @@ const CodeExecution = () => {
         }
     },[])
     
-  const [Language, setLanguage] = useState('python');
+  const [Language, setLanguage] = useState('sql');
   const [ScreenMode, setScreenMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -35,13 +35,6 @@ const CodeExecution = () => {
   const [loading, setLoading] = useState(false);
 
   const Code = {
-    "python": `print("Hello World!")`,
-    "c": `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
-    "cpp": `#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}`,
-    "java": `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
-    "javascript": `console.log("Hello, World!");`,
-    "java":`public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
-    "dart":`void main() {\n    print('Hello, World!');\n}`,
     "sql":`SELECT * FROM yourTable WHERE id = ?`
 };
 
@@ -94,39 +87,88 @@ const CodeExecution = () => {
     outputDiv.innerHTML = '';
   
     try {
-      const response = await axios.post(`${api}/${Language}`, {
-        code: codeContent,
-        input: Custominput
-      });
+        // Sending code and custom input to the backend
+        const response = await axios.post(`${api}/problemcompiler/${Language}`, {
+            code: codeContent,
+            input: Custominput,
+            userId : userName
+        });
+    
+        const { success, data, message, error } = response.data;  // Destructuring response data
+    
+        let successVal = success !== undefined ? success : '-';
+        let errorVal = error !== undefined ? error : '-';
+        let messageVal = message !== undefined ? message : '-';
+    
+        // Create table structure for the response
+        let tableContent = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Success</th>
+                        <th>Error</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${escapeHtml(String(successVal))}</td>
+                        <td style="color: red;">${escapeHtml(String(errorVal))}</td>
+                        <td style="color: red;">${escapeHtml(String(messageVal))}</td>
+                    </tr>
+                </tbody>
+            </table>`;
+    
+        // Check if there is data to display (for successful SQL queries)
+if (data && data.length > 0) {
+    // Convert the data to a JSON string and format it
+    const jsonData = JSON.stringify(data, null, 2); // Indents with 2 spaces for readability
 
-      const { output = '', error = '' } = response.data;
-      const result = error ? `Error: ${escapeHtml(error)}` : escapeHtml(output || '');
-      outputDiv.innerHTML = `<span>${result.replace(/\n/g, '<br />')}</span>`;
-      // if (Language === 'python') {
-      //   const response = await axios.post(`${api}/python`, {
-      //     code: codeContent,
-      //     input: Custominput
-      //   });
-  
-      //   const { output = '', error = '' } = response.data;
-      //   const result = error ? `Error: ${escapeHtml(error)}` : escapeHtml(output || '');
-      //   outputDiv.innerHTML = `<span>${result.replace(/\n/g, '<br />')}</span>`;
-  
-      // } else if (Language === 'javascript') {
-      //   const response = await axios.post(`${api}/javascript`, {
-      //     code: codeContent,
-      //     input: Custominput
-      //   });
-  
-      //   const { output = '', error = '' } = response.data;
-      //   const result = error ? `Error: ${escapeHtml(error)}` : escapeHtml(output || '');
-      //   outputDiv.innerHTML = `<span>${result.replace(/\n/g, '<br />')}</span>`;
-      // } else {
-      //   outputDiv.innerHTML = `<span style="color: red;">Execution for ${Language} is not supported in the browser.</span>`;
-      // }
+    // Display the formatted JSON string in an HTML element
+    tableContent += `<pre>${escapeHtml(jsonData)}</pre>`;
+        } else if (success) {
+            // If success but no data, display a message
+            tableContent += `
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr><th>No Data Available</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>No results found for the query.</td></tr>
+                    </tbody>
+                </table>`;
+        }
+    
+        outputDiv.innerHTML = tableContent;  // Display the table in the outputDiv
+    
     } catch (error) {
-      outputDiv.innerHTML = `<span style="color: red;">Error: ${escapeHtml(error.message)}</span>`;
+        // Handling unexpected errors (e.g., network or server issues)
+        let errorVal = error.response ? error.response.data.error : error.message;
+        let messageVal = error.response ? error.response.data.message : 'Internal Server Error';
+    
+        outputDiv.innerHTML = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Success</th>
+                        <th>Error</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>-</td>
+                        <td style="color: red;">${escapeHtml(errorVal || '-')}</td>
+                        <td style="color: red;">${escapeHtml(messageVal || '-')}</td>
+                    </tr>
+                </tbody>
+            </table>`;
     }
+    
+    
+    
+    
+    
 
     setLoading(false);
   };
@@ -166,12 +208,7 @@ const CodeExecution = () => {
               <MenuItem value="">
                 <em>Language</em>
               </MenuItem>
-              <MenuItem value={'python'}>Python 3.10.0</MenuItem>
-              <MenuItem value={'c'}>C 10.2.0</MenuItem>
-              <MenuItem value={'cpp'}>Cpp 10.2.0</MenuItem>
-              <MenuItem value={'java'}>Java 21.0.1 (LTS)</MenuItem>
-              <MenuItem value={'dart'}>Dart 3.0.0</MenuItem>
-              <MenuItem value={'javascript'}>JavaScript 1.32.3</MenuItem>
+              {/* <MenuItem value={'varilog'}>Varilog</MenuItem> */}
               <MenuItem value={'sql'}>SQL</MenuItem>
             </Select>
           </div>
@@ -259,4 +296,4 @@ const CodeExecution = () => {
   );
 };
 
-export default CodeExecution;
+export default SqlandVarilog;

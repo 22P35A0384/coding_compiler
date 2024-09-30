@@ -13,7 +13,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useNavigate } from 'react-router-dom';
 import api from '../backendapi';
 
-const CodeExecution = () => {
+const Varilog = () => {
     const navigate = useNavigate()
     const [userName, setUsername] = useState('')
     useEffect(()=>{
@@ -25,7 +25,7 @@ const CodeExecution = () => {
         }
     },[])
     
-  const [Language, setLanguage] = useState('python');
+  const [Language, setLanguage] = useState('verilog');
   const [ScreenMode, setScreenMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -35,14 +35,7 @@ const CodeExecution = () => {
   const [loading, setLoading] = useState(false);
 
   const Code = {
-    "python": `print("Hello World!")`,
-    "c": `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
-    "cpp": `#include <iostream>\n\nint main() {\n    std::cout << "Hello, World!" << std::endl;\n    return 0;\n}`,
-    "java": `public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
-    "javascript": `console.log("Hello, World!");`,
-    "java":`public class HelloWorld {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
-    "dart":`void main() {\n    print('Hello, World!');\n}`,
-    "sql":`SELECT * FROM yourTable WHERE id = ?`
+    "verilog": `module HelloWorld;\ninitial begin\n  $display("Hello, World!");\nend\nendmodule` 
 };
 
   useEffect(() => {
@@ -94,7 +87,7 @@ const CodeExecution = () => {
     outputDiv.innerHTML = '';
   
     try {
-      const response = await axios.post(`${api}/${Language}`, {
+      const response = await axios.post(`${api}/problemcompiler/${Language}`, {
         code: codeContent,
         input: Custominput
       });
@@ -166,13 +159,7 @@ const CodeExecution = () => {
               <MenuItem value="">
                 <em>Language</em>
               </MenuItem>
-              <MenuItem value={'python'}>Python 3.10.0</MenuItem>
-              <MenuItem value={'c'}>C 10.2.0</MenuItem>
-              <MenuItem value={'cpp'}>Cpp 10.2.0</MenuItem>
-              <MenuItem value={'java'}>Java 21.0.1 (LTS)</MenuItem>
-              <MenuItem value={'dart'}>Dart 3.0.0</MenuItem>
-              <MenuItem value={'javascript'}>JavaScript 1.32.3</MenuItem>
-              <MenuItem value={'sql'}>SQL</MenuItem>
+              <MenuItem value={'verilog'}>Verilog</MenuItem>
             </Select>
           </div>
           <div className={Styles.headright}>
@@ -259,4 +246,4 @@ const CodeExecution = () => {
   );
 };
 
-export default CodeExecution;
+export default Varilog;
