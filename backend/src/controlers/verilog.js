@@ -21,13 +21,13 @@ const Verilogcompiler = async (req, res) => {
 
         let error = '';
         let responded = false;
-        const timeout = 60000; // 60-second timeout for compilation
+        const timeout = 20000; // 20-second timeout for compilation
 
         // Set a timeout to kill the process if it runs too long
         const timer = setTimeout(() => {
             if (!responded) {
                 iverilogProcess.kill('SIGTERM'); // Terminate the process
-                res.status(500).json({ error: 'Compilation timeout' });
+                res.status(200).json({ error: 'Compilation timeout' });
                 responded = true;
             }
         }, timeout);
@@ -64,7 +64,7 @@ const Verilogcompiler = async (req, res) => {
                         // Simulation failed, sanitize the error before returning it
                         error = sanitizeOutput(error, filePath);
                         if (!responded) {
-                            res.status(500).json({ error });
+                            res.status(200).json({ error });
                             responded = true;
                         }
                     }
@@ -80,7 +80,7 @@ const Verilogcompiler = async (req, res) => {
 
                 vvpProcess.on('error', (err) => {
                     if (!responded) {
-                        res.status(500).json({ error: err.message });
+                        res.status(200).json({ error: err.message });
                         responded = true;
                     }
                 });
@@ -89,7 +89,7 @@ const Verilogcompiler = async (req, res) => {
                 // Compilation failed, sanitize the error before returning it
                 error = sanitizeOutput(error, filePath);
                 if (!responded) {
-                    res.status(500).json({ error });
+                    res.status(200).json({ error });
                     responded = true;
                 }
 
@@ -106,7 +106,7 @@ const Verilogcompiler = async (req, res) => {
         iverilogProcess.on('error', (err) => {
             clearTimeout(timer); // Clear the timeout on error
             if (!responded) {
-                res.status(500).json({ error: err.message });
+                res.status(200).json({ error: err.message });
                 responded = true;
             }
         });
