@@ -87,7 +87,7 @@ const Varilog = () => {
     outputDiv.innerHTML = '';
   
     try {
-      const response = await axios.post(`${api}/problemcompiler/${Language}`, {
+      const response = await axios.post(`${api}/${Language}`, {
         code: codeContent,
         input: Custominput
       });

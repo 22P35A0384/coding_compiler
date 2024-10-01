@@ -26,6 +26,7 @@ import Capi from "./src/routers/crouter.js";
 import Cppapi from "./src/routers/cpprouter.js";
 import Javaapi from "./src/routers/javarouter.js";
 import Dartapi from "./src/routers/dartrouter.js";
+import Verilogapi from "./src/routers/verilogrouter.js"
 import PythonProblemCompiler from "./src/routers/problem_compiler/python_router.js";
 import CProblemCompiler from "./src/routers/problem_compiler/c_router.js";
 import JavaProblemCompiler from "./src/routers/problem_compiler/java_router.js";
@@ -34,6 +35,7 @@ import JsProblemCompiler from "./src/routers/problem_compiler/js_router.js";
 import CppProblemCompiler from "./src/routers/problem_compiler/cpp_router.js";
 import VerilogProblemCompiler from "./src/routers/problem_compiler/varilog_router.js";
 import SqlProblemCompiler from "./src/routers/problem_compiler/sql_router.js";
+
 
 const app = express();
 
@@ -78,6 +80,7 @@ app.use('/',Newuserapi);
 app.use('/',Loginapi);
 app.use('/',VerilogProblemCompiler);
 app.use('/',SqlProblemCompiler);
+app.use('/',Verilogapi);
 
 
 // Testing Space
