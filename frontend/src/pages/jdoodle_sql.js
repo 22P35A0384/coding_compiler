@@ -88,10 +88,15 @@ const Jdoodle_Sql = () => {
   
     try {
         // Sending code and custom input to the backend
-        const response = await axios.post(`${api}/problemcompiler/${Language}`, {
-            code: codeContent,
-            input: Custominput,
-            userId : userName
+        const response = await axios.post(`https://api.jdoodle.com/v1/execute`, {
+            script: codeContent,
+            // input: Custominput,
+            // userId : userName
+            language: 'mysql',
+            versionIndex: '0',
+            clientSecret: 'YOUR_CLIENT_SECRET',
+            clientId: 'YOUR_CLIENT_ID',
+
         });
     
         const { success, data, message, error } = response.data;  // Destructuring response data
