@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 const Verilogcompiler = async (req, res) => {
     const { code } = req.body; // Removed unnecessary fields
-
+    console.log(code);
     try {
         const filePath = path.join(__dirname, `temp_code.v`); // Save Verilog code as temp_code.v
         const compiledFilePath = path.join(__dirname, 'temp_out.vvp');
