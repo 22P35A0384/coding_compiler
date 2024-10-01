@@ -13,6 +13,7 @@ import Piston from './pages/testcompiler';
 import Signup from './pages/signup';
 import SqlandVarilog from './pages/sql&varilog';
 import Varilog from './pages/varilog';
+import Jdoodle_Sql from './pages/jdoodle_sql';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path='/piston' element={<Piston/>}/>
           <Route path='/sql' element={<SqlandVarilog/>}/>
           <Route path='/verilog' element={<Varilog/>}/>
+          <Route path='/jdoodle_sql' element={<Jdoodle_Sql/>}/>
         </Routes>
       </BrowserRouter>
     </div>
