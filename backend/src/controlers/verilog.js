@@ -58,10 +58,12 @@ const Verilogcompiler = async (req, res) => {
 
                 vvpProcess.on('close', (vvpCode) => {
                     if (vvpCode === 0) {
-                        // Simulation succeeded, return output
+                        // Simulation succeeded, sanitize the output before returning it
+                        output = sanitizeOutput(output, filePath);
                         res.status(200).json({ message: 'Simulation successful', output });
                     } else {
-                        // Simulation failed, return error
+                        // Simulation failed, sanitize the error before returning it
+                        error = sanitizeOutput(error, filePath);
                         if (!responded) {
                             res.status(500).json({ error });
                             responded = true;
@@ -85,7 +87,8 @@ const Verilogcompiler = async (req, res) => {
                 });
 
             } else {
-                // Compilation failed, return error
+                // Compilation failed, sanitize the error before returning it
+                error = sanitizeOutput(error, filePath);
                 if (!responded) {
                     res.status(500).json({ error });
                     responded = true;
@@ -112,5 +115,16 @@ const Verilogcompiler = async (req, res) => {
         res.status(500).json({ error: 'Server error', message: err.message });
     }
 };
+
+// Function to sanitize output and remove sensitive file paths
+function sanitizeOutput(output, filePath) {
+    // Get the file name only, without the directory path
+    const fileName = path.basename(filePath);
+
+    // Replace full file path with just the file name in the output
+    const sanitizedOutput = output.replace(new RegExp(filePath, 'g'), fileName);
+
+    return sanitizedOutput;
+}
 
 export default Verilogcompiler;
