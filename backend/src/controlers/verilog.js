@@ -8,7 +8,6 @@ const __dirname = path.dirname(__filename);
 
 const Verilogcompiler = async (req, res) => {
     const { code } = req.body; // Verilog code from the request
-    console.log(code);
     
     try {
         const filePath = path.join(__dirname, 'temp_code.v'); // Save Verilog code as temp_code.v
@@ -119,8 +118,8 @@ const Verilogcompiler = async (req, res) => {
 // Function to sanitize output and remove sensitive file paths
 function sanitizeOutput(output, filePath) {
     // Get the file name only, without the directory path
-    const fileName = path.basename(filePath);
-
+    // const fileName = path.basename(filePath);
+    const fileName = 'Verilog Compiler ';
     // Replace full file path with just the file name in the output
     const sanitizedOutput = output.replace(new RegExp(filePath, 'g'), fileName);
 
