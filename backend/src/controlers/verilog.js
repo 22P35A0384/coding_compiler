@@ -7,14 +7,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const Verilogcompiler = async (req, res) => {
-    const { code } = req.body; // Verilog code from the request
-    
+    const { code, input } = req.body; // Get Verilog code and custom input from the request
+    console.log(input);
     try {
         const filePath = path.join(__dirname, 'temp_code.v'); // Save Verilog code as temp_code.v
         const compiledFilePath = path.join(__dirname, 'temp_out.vvp');
+        const inputFilePath = path.join(__dirname, 'input_data.txt'); // Path for the input file
 
         // Save the Verilog code to a file
         fs.writeFileSync(filePath, code);
+
+        // Save the custom input to a .txt file
+        fs.writeFileSync(inputFilePath, input);
 
         // Compile the Verilog code
         const iverilogProcess = spawn('iverilog', ['-o', compiledFilePath, filePath], { cwd: __dirname });
@@ -41,7 +45,7 @@ const Verilogcompiler = async (req, res) => {
             clearTimeout(timer); // Clear timeout if process completes
             if (code === 0) {
                 // Compilation succeeded, now simulate the code using vvp
-                const vvpProcess = spawn('vvp', [compiledFilePath], { cwd: __dirname });
+                const vvpProcess = spawn('vvp', [compiledFilePath, '-f', inputFilePath], { cwd: __dirname });
 
                 let output = '';
 
@@ -56,29 +60,19 @@ const Verilogcompiler = async (req, res) => {
                 });
 
                 vvpProcess.on('close', (vvpCode) => {
+                    // Cleanup and respond based on simulation success
+                    cleanupFiles(filePath, compiledFilePath, inputFilePath);
                     if (vvpCode === 0) {
-                        // Simulation succeeded, sanitize the output before returning it
                         output = sanitizeOutput(output, filePath);
                         res.status(200).json({ message: 'Simulation successful', output });
                     } else {
-                        // Simulation failed, sanitize the error before returning it
                         error = sanitizeOutput(error, filePath);
-                        if (!responded) {
-                            res.status(200).json({ error });
-                            responded = true;
-                        }
-                    }
-
-                    // Cleanup files
-                    try {
-                        fs.unlinkSync(filePath);
-                        fs.unlinkSync(compiledFilePath);
-                    } catch (cleanupError) {
-                        console.error('Error cleaning up files:', cleanupError.message);
+                        res.status(200).json({ error });
                     }
                 });
 
                 vvpProcess.on('error', (err) => {
+                    cleanupFiles(filePath, compiledFilePath, inputFilePath);
                     if (!responded) {
                         res.status(200).json({ error: err.message });
                         responded = true;
@@ -88,23 +82,17 @@ const Verilogcompiler = async (req, res) => {
             } else {
                 // Compilation failed, sanitize the error before returning it
                 error = sanitizeOutput(error, filePath);
+                cleanupFiles(filePath, compiledFilePath, inputFilePath);
                 if (!responded) {
                     res.status(200).json({ error });
                     responded = true;
-                }
-
-                // Cleanup files after compilation failure
-                try {
-                    fs.unlinkSync(filePath);
-                    fs.unlinkSync(compiledFilePath);
-                } catch (cleanupError) {
-                    console.error('Error cleaning up files:', cleanupError.message);
                 }
             }
         });
 
         iverilogProcess.on('error', (err) => {
             clearTimeout(timer); // Clear the timeout on error
+            cleanupFiles(filePath, compiledFilePath, inputFilePath);
             if (!responded) {
                 res.status(200).json({ error: err.message });
                 responded = true;
@@ -117,13 +105,22 @@ const Verilogcompiler = async (req, res) => {
 
 // Function to sanitize output and remove sensitive file paths
 function sanitizeOutput(output, filePath) {
-    // Get the file name only, without the directory path
-    // const fileName = path.basename(filePath);
     const fileName = 'Verilog Compiler ';
-    // Replace full file path with just the file name in the output
     const sanitizedOutput = output.replace(new RegExp(filePath, 'g'), fileName);
-
     return sanitizedOutput;
+}
+
+// Function to cleanup temporary files
+function cleanupFiles(...filePaths) {
+    filePaths.forEach(filePath => {
+        try {
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath); // Delete the file if it exists
+            }
+        } catch (cleanupError) {
+            console.error('Error cleaning up files:', cleanupError.message);
+        }
+    });
 }
 
 export default Verilogcompiler;
