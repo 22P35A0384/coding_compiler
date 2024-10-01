@@ -20,7 +20,6 @@ const Verilogcompiler = async (req, res) => {
         // Compile the Verilog code
         const iverilogProcess = spawn('iverilog', ['-o', compiledFilePath, filePath], { cwd: __dirname });
 
-        let output = '';
         let error = '';
         let responded = false;
         const timeout = 60000; // 60-second timeout for compilation
@@ -34,12 +33,7 @@ const Verilogcompiler = async (req, res) => {
             }
         }, timeout);
 
-        // Capture standard output (stdout)
-        iverilogProcess.stdout.on('data', (data) => {
-            output += data.toString(); // Collect compilation output
-        });
-
-        // Capture standard error (stderr)
+        // Capture compilation errors (stderr)
         iverilogProcess.stderr.on('data', (data) => {
             error += data.toString(); // Collect error data
         });
@@ -47,22 +41,63 @@ const Verilogcompiler = async (req, res) => {
         iverilogProcess.on('close', (code) => {
             clearTimeout(timer); // Clear timeout if process completes
             if (code === 0) {
-                // Compilation succeeded, return output
-                res.status(200).json({ message: 'Compilation successful', output });
+                // Compilation succeeded, now simulate the code using vvp
+                const vvpProcess = spawn('vvp', [compiledFilePath], { cwd: __dirname });
+
+                let output = '';
+
+                // Capture simulation output (stdout)
+                vvpProcess.stdout.on('data', (data) => {
+                    output += data.toString(); // Collect simulation output
+                });
+
+                // Capture simulation errors (stderr)
+                vvpProcess.stderr.on('data', (data) => {
+                    error += data.toString(); // Collect error data
+                });
+
+                vvpProcess.on('close', (vvpCode) => {
+                    if (vvpCode === 0) {
+                        // Simulation succeeded, return output
+                        res.status(200).json({ message: 'Simulation successful', output });
+                    } else {
+                        // Simulation failed, return error
+                        if (!responded) {
+                            res.status(500).json({ error });
+                            responded = true;
+                        }
+                    }
+
+                    // Cleanup files
+                    try {
+                        fs.unlinkSync(filePath);
+                        fs.unlinkSync(compiledFilePath);
+                    } catch (cleanupError) {
+                        console.error('Error cleaning up files:', cleanupError.message);
+                    }
+                });
+
+                vvpProcess.on('error', (err) => {
+                    if (!responded) {
+                        res.status(500).json({ error: err.message });
+                        responded = true;
+                    }
+                });
+
             } else {
                 // Compilation failed, return error
                 if (!responded) {
                     res.status(500).json({ error });
                     responded = true;
                 }
-            }
 
-            // Cleanup files
-            try {
-                fs.unlinkSync(filePath);
-                fs.unlinkSync(compiledFilePath);
-            } catch (cleanupError) {
-                console.error('Error cleaning up files:', cleanupError.message);
+                // Cleanup files after compilation failure
+                try {
+                    fs.unlinkSync(filePath);
+                    fs.unlinkSync(compiledFilePath);
+                } catch (cleanupError) {
+                    console.error('Error cleaning up files:', cleanupError.message);
+                }
             }
         });
 
