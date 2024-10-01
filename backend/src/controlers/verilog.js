@@ -7,10 +7,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const Verilogcompiler = async (req, res) => {
-    const { code } = req.body; // Removed unnecessary fields
+    const { code } = req.body; // Verilog code from the request
     console.log(code);
+    
     try {
-        const filePath = path.join(__dirname, `temp_code.v`); // Save Verilog code as temp_code.v
+        const filePath = path.join(__dirname, 'temp_code.v'); // Save Verilog code as temp_code.v
         const compiledFilePath = path.join(__dirname, 'temp_out.vvp');
 
         // Save the Verilog code to a file
@@ -19,6 +20,7 @@ const Verilogcompiler = async (req, res) => {
         // Compile the Verilog code
         const iverilogProcess = spawn('iverilog', ['-o', compiledFilePath, filePath], { cwd: __dirname });
 
+        let output = '';
         let error = '';
         let responded = false;
         const timeout = 60000; // 60-second timeout for compilation
@@ -32,6 +34,12 @@ const Verilogcompiler = async (req, res) => {
             }
         }, timeout);
 
+        // Capture standard output (stdout)
+        iverilogProcess.stdout.on('data', (data) => {
+            output += data.toString(); // Collect compilation output
+        });
+
+        // Capture standard error (stderr)
         iverilogProcess.stderr.on('data', (data) => {
             error += data.toString(); // Collect error data
         });
@@ -39,10 +47,10 @@ const Verilogcompiler = async (req, res) => {
         iverilogProcess.on('close', (code) => {
             clearTimeout(timer); // Clear timeout if process completes
             if (code === 0) {
-                // Compilation succeeded
-                res.status(200).json({ message: 'Compilation successful' });
+                // Compilation succeeded, return output
+                res.status(200).json({ message: 'Compilation successful', output });
             } else {
-                // Compilation failed
+                // Compilation failed, return error
                 if (!responded) {
                     res.status(500).json({ error });
                     responded = true;
