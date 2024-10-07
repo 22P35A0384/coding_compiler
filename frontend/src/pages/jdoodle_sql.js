@@ -16,14 +16,14 @@ import api from '../backendapi';
 const Jdoodle_Sql = () => {
     const navigate = useNavigate()
     const [userName, setUsername] = useState('')
-    useEffect(()=>{
-        const user =JSON.parse(localStorage.getItem("compiler_user"))
-        if(!user){
-            navigate("/login")
-        }else{
-            setUsername(user.username)
-        }
-    },[])
+    // useEffect(()=>{
+    //     const user =JSON.parse(localStorage.getItem("compiler_user"))
+    //     if(!user){
+    //         navigate("/login")
+    //     }else{
+    //         setUsername(user.username)
+    //     }
+    // },[])
     
   const [Language, setLanguage] = useState('sql');
   const [ScreenMode, setScreenMode] = useState(false);
@@ -92,10 +92,10 @@ const Jdoodle_Sql = () => {
             script: codeContent,
             // input: Custominput,
             // userId : userName
-            language: 'mysql',
+            language: 'sql',
             versionIndex: '0',
-            clientSecret: 'YOUR_CLIENT_SECRET',
-            clientId: 'YOUR_CLIENT_ID',
+            clientSecret: 'b31934f8d34b5ddf1135cc53b287103aa50ab1579644f40b3996d76acbd154ed',
+            clientId: '8877d505c58850c9528f1c7456f01cf2',
 
         });
     
