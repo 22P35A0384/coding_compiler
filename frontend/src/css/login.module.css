@@ -1,0 +1,55 @@
+.container {
+    padding: 40px;
+    border-radius: 20px;
+    border: 8px solid #223243;
+    box-shadow: -5px -5px 15px rgba(255, 255, 255, 0.1),
+      5px 5px 15px rgba(0, 0, 0, 0.35),
+      inset -5px -5px 15px rgba(255, 255, 255, 0.1),
+      inset 5px 5px 15px rgba(0, 0, 0, 0.35);
+    background-color: #223243;
+  }
+  
+  .form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .inputBox {
+    position: relative;
+    width: 300px;
+  }
+  
+  .inputBox input {
+    padding: 12px 10px 12px 48px;
+    background: #223243;
+    color: white;
+    border-radius: 25px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .inputBox i {
+    position: absolute;
+    left: 16px;
+    top: 15px;
+    color: #00dfc4;
+  }
+  
+  .inputBox input[type="submit"] {
+    background-color: #00dfc4;
+    color: #223243;
+    cursor: pointer;
+    padding: 10px 0;
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  a {
+    color: white;
+    font-weight: 500;
+  }
+  

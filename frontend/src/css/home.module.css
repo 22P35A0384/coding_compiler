@@ -1,0 +1,71 @@
+/* .container {
+    padding: 20px;
+  } */
+  
+  .header {
+    position:fixed; 
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    z-index: 9999999999999;
+    background-color: #FFFFFF;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0px 4px 3px lightblue;
+  }
+  
+  .userName {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .addButton {
+    background-color: #4caf50;
+  }
+  
+  .createButton {
+    background-color: #f44336;
+  }
+  
+  .problemList {
+    margin-top: 50px !important;
+    padding: 20px;
+  }
+  
+  .problemCard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-image: url('https://cdn2.f-cdn.com/files/download/117657449/b9525e.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+  }
+  
+  .problemCard .MuiCardContent-root {
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text */
+  }
+  
+  .problemCard .MuiCardActions-root {
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background for actions */
+  }
+  
+.profile{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
