@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { onRequest } from 'firebase-functions/v2/https';
-
+import http from 'http';
+import { Server as SocketIO } from 'socket.io';
+import Problem from './src/models/problem.js';
 
 // function imports
 import Testingapi from "./src/routers/testingrouter.js";
@@ -46,11 +48,76 @@ app.use(bodyParser.json({ limit: '50mb' })); // Set the limit to 10 MB
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); // For URL-encoded data if necessary
 
 app.use(cors());
+
+// Create an HTTP server
+const server = http.createServer(app);
+
+// Initialize socket.io
+const io = new SocketIO(server, {
+    cors: {
+      origin: "*",  // Update this to restrict allowed origins in production
+      methods: ["GET", "POST"]
+    }
+});
+
+
+// Store user connections
+const userConnections = {}; // Store client ID with socket ID
+
+io.on('connection', (socket) => {
+    // Get the unique ID from the query parameter
+    const uniqueId = socket.handshake.query.id; // Access the query parameter
+    userConnections[uniqueId] = socket.id; // Store the unique ID with the socket ID
+
+    console.log(`Client connected: ${uniqueId},${socket.id}`);
+
+    // Emit the client ID back to the client if needed
+    socket.emit('clientId', uniqueId);
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log(`Client disconnected: ${uniqueId},${socket.id}`);
+        delete userConnections[uniqueId]; // Remove the client from the connections
+    });
+});
+
 const port = 5000;
 mongoose.connect('mongodb+srv://admin:cLBG7LhkqX7orsSy@tally-codebrewers.d2lej.mongodb.net/tally-codebrewers?retryWrites=true&w=majority&appName=Tally-CodeBrewers')
-    .then(()=>app.listen(port))
+    .then(()=>server.listen(port))
     .then(()=>console.log(`Server Running on ${port} && Database Connected Sucessfully :)`))
     .catch((err)=>console.log(err))
+
+
+const MyModel = Problem; // Replace with your model name
+
+// Open a change stream on the collection
+const changeStream = MyModel.watch(); // Ensure the watch is called on a collection
+
+// Listen for change events
+// changeStream.on('change', (change) => {
+//   console.log('A change occurred:', change);
+
+//   // Emit event to all connected clients (for example, using socket.io)
+//   io.emit('dbChange', change);  // Make sure io is defined and socket.io is initialized
+// });
+
+changeStream.on('change', (change) => {
+    console.log('Database Change Detected:', change);
+
+    // Determine which user the update should go to
+    const targetUserId = '22p35a0384'; // Example target userId
+    const socketId = userConnections[targetUserId]; // Find the socketId of the target user
+
+    if (socketId) {
+        io.to(socketId).emit('dbUpdate', {
+            message: 'Database has been updated!',
+            data: change.updateDescription.updatedFields // Send the updated fields
+        });
+        console.log(`Sent update to user with ID ${targetUserId} and socket ${socketId}`);
+    } else {
+        console.log(`User with ID ${targetUserId} is not connected.`);
+    }
+});
 
 
 // Producction Functions

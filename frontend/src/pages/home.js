@@ -8,8 +8,11 @@ import TerminalIcon from '@mui/icons-material/Terminal';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LogoutIcon from '@mui/icons-material/Logout';
 import api from '../backendapi';
+import { io } from 'socket.io-client';
+const ENDPOINT = 'http://localhost:5000';
 
 const HomePage = () => {
+
   const [profileImageUrl, setProfileImageUrl] = useState('');
 
 useEffect(() => {
@@ -73,6 +76,60 @@ useEffect(() => {
   const handleSolve = (id,n) => {
     navigate(`/editor/${n}/${id}`);
   };
+
+  const userId = '22p35a0384'; // This should be the unique user ID
+
+  useEffect(() => {
+      // Connect to the server and pass the userId as a query parameter
+      const socket = io(ENDPOINT, { query: { id: userId } });
+
+      // Listen for 'dbUpdate' events
+      socket.on('dbUpdate', async(data) => {
+          console.log('Received database update:', data);
+          const user =JSON.parse(localStorage.getItem("compiler_user"))
+          try {
+            const username = user.username
+            const response = await axios.post(`${api}/allqns`,{username});
+            setProblems(response.data);
+          } catch (error) {
+            console.error('Error fetching problems:', error);
+          }
+          
+          // Handle the database update here (e.g., update the UI)
+      });
+
+      return () => {
+          socket.disconnect();
+      };
+  }, []);
+
+  // useEffect(() => {
+  //   const user =JSON.parse(localStorage.getItem("compiler_user"))
+  //   // Connect to the WebSocket server
+  //   const socket = io(ENDPOINT, {
+  //     query:{id:user.username}
+  //   });
+
+  //   // Listen for 'dbChange' event from the server
+  //   socket.on('dbChange', async(change) => {
+  //     console.log('Database change received:', change);
+  //     try {
+  //       const username = user.username
+  //       const response = await axios.post(`${api}/allqns`,{username});
+  //       setProblems(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching problems:', error);
+  //     }
+
+  //     // Update the state with the new change
+  //     // setChanges((prevChanges) => [...prevChanges, change]);
+  //   });
+
+  //   // Clean up the connection when the component unmounts
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   return (
     <Box className={styles.container}>
