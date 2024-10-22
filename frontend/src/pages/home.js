@@ -81,7 +81,7 @@ useEffect(() => {
 
   useEffect(() => {
       // Connect to the server and pass the userId as a query parameter
-      const socket = io(ENDPOINT, { query: { id: userId } });
+      const socket = io(api, { query: { id: userId } });
 
       // Listen for 'dbUpdate' events
       socket.on('dbUpdate', async(data) => {
