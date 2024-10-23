@@ -76,8 +76,9 @@ useEffect(() => {
   const handleSolve = (id,n) => {
     navigate(`/editor/${n}/${id}`);
   };
-
-  const userId = '22p35a0384'; // This should be the unique user ID
+  const user =JSON.parse(localStorage.getItem("compiler_user"))
+  const userId = user.username
+  // const userId = '22p35a0384'; // This should be the unique user ID
 
   useEffect(() => {
       // Connect to the server and pass the userId as a query parameter
